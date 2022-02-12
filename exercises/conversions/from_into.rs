@@ -33,10 +33,41 @@ impl Default for Person {
 // If while parsing the age, something goes wrong, then return the default of Person
 // Otherwise, then return an instantiated Person object with the results
 
-// I AM NOT DONE
+use std::error::Error;
+
+fn create_person_helper(s: &str) -> Result<Person, Box<dyn Error>> {
+    if s.len() == 0 {
+        return Ok(Default::default());
+    }
+
+    let mut split_string = s.split(",");
+
+    let name = split_string.next().ok_or("No name found")?;
+    if name.len() == 0 {
+        return Ok(Default::default());
+    }
+
+    let string_age = split_string.next().ok_or("age not found")?;
+    let age = string_age.parse::<usize>()?;
+
+    if None == split_string.next() {
+        return Ok(Person {
+            name: String::from(name),
+            age: age,
+        });
+    }
+
+    Ok(Default::default())
+}
+
 
 impl From<&str> for Person {
     fn from(s: &str) -> Person {
+        if let Ok(person) = create_person_helper(s) {
+            return person;
+        }
+        
+        Person::default()
     }
 }
 
